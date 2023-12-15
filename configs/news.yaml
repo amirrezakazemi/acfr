@@ -1,0 +1,16 @@
+enc:
+  input_dim: 3477
+  hidden_dims: []
+  output_dim: 50
+atten:
+  input_dim: 50
+  hidden_dim: 50
+  output_dim: 1
+  degree: 5
+disc: 
+  input_dim: 50
+  hidden_dims: []
+  output_dim: 1
+lr1: 1e-4
+lr2: 1e-3
+gamma: 1e-2
