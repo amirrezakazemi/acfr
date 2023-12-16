@@ -96,7 +96,7 @@ def make_continuous(data, v1, v2, v3, selection_bias):
     return continuous_data
 
 
-def create_synthetic_data(dataset="tcga", dir='data/tcga/', run_n=0, selection_bias=2):
+def create_synthetic_data(dataset="news", dir='/data', run_n=0, selection_bias=2):
     global NUMBER_OF_FEATURES
     if dataset == "tcga":
 

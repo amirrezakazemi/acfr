@@ -5,7 +5,7 @@ import torch
 from tqdm import tqdm, trange
 import torch.nn.functional as F
 from src.data_iterator import get_iter
-from src.acfr import ACFR
+from src.model import ACFR
 from src.utils import get_cfg
 import logging
 

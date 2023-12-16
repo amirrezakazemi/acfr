@@ -13,8 +13,6 @@ class ACFR(nn.Module):
         self.NetE = EncoderNet(self.args['enc']['input_dim'], self.args['enc']['hidden_dims'],
                                self.args['enc']['output_dim'])
 
-        # self.NetP = RBFPredNet(self.args['pred']['input_dim'], self.args['pred']['hidden_dims'],
-        #                            self.args['pred']['output_dim'], self.args['pred']['degree'])
 
         self.NetP = CrossAttention(input_dim = self.args['atten']['input_dim'], hidden_dim=self.args['atten']['input_dim'], 
                                     output_dim=self.args['atten']['output_dim'], degree=self.args['atten']['degree'])
@@ -117,70 +115,6 @@ class DiscNet(nn.Module):
         return self.seqdisc(x)
 
 
-class RBFPredNet(nn.Module):
-    def __init__(self, input_dim, hidden_dims, output_dim=1, degree=10, activation=nn.ReLU()) -> None:
-        super(RBFPredNet, self).__init__()
-        self.seqpred = None
-        layers = list()
-        all_layers_dim = copy.deepcopy(hidden_dims)
-        all_layers_dim.insert(0, input_dim)
-
-        for i in range(len(all_layers_dim) - 1):
-            layers.append(RBF_FC(all_layers_dim[i], all_layers_dim[i + 1], degree, activation, is_bias=True))
-        layers.append(RBF_FC(all_layers_dim[-1], output_dim, degree, None, is_bias=True, is_last_layer=True))
-        self.seqpred = nn.Sequential(*layers)
-
-    def forward(self, x, t):
-        return self.seqpred((x, t))
-
-class RBF_FC(nn.Module):
-    def __init__(self, input_dim, output_dim, degree, activation, is_bias=True, is_last_layer=False) -> None:
-        super(RBF_FC, self).__init__()
-        
-        self.num_basis = degree
-        mu_vec = torch.randn(degree)
-        std_vec = [1]* degree
-        self.basis = RBF(self.num_basis, mu_vec, std_vec)
-        self.weights = nn.Parameter(torch.randn(input_dim, output_dim, self.num_basis), requires_grad=True)
-        self.bias = nn.Parameter(torch.zeros(output_dim, self.num_basis), requires_grad=True)
-        self.activation = activation
-        self.is_bias = is_bias
-        self.is_last_layer = is_last_layer
-
-    def forward(self, inp):
-        x, t = inp
-        weighted_x = torch.matmul(self.weights.T, x.T).T
-        t_basis = self.basis.forward(t)
-        uns_t_basis = torch.unsqueeze(t_basis, 1)
-        z = torch.sum(weighted_x * uns_t_basis, dim=2)
-        if self.is_bias:
-            bias_z = torch.matmul(self.bias, t_basis.T).T
-            z += bias_z
-        if self.activation is not None:
-            z = self.activation(z)
-        if self.is_last_layer:
-            return z
-
-        return z, t
-
-class RBF:
-    def __init__(self, num_basis, mu_vec, std_vec) -> None:
-
-        self.num_basis = num_basis
-        self.mu_vec = mu_vec
-        self.std_vec = std_vec
-        self.exp = torch.exp
-    
-    def get_rbf(self, t):
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        t = t.squeeze()
-        out = torch.zeros(t.shape[0], self.num_basis).to(device)
-
-        for _ in range(self.num_basis):
-            out[:, _] = self.exp( -1 *  ((t - self.mu_vec[_])**2 / self.std_vec[_]**2))
-        return out
-
-
 class CrossAttention(nn.Module):
     def __init__(self, input_dim, hidden_dim=16, output_dim=1, degree=5, knots=[1/3, 2/3]):
         super(CrossAttention, self).__init__()
@@ -188,10 +122,6 @@ class CrossAttention(nn.Module):
         
         self.trunc = Truncated_power(degree=degree, knots=knots)
 
-        # degree = 10
-        # mu_vec = torch.randn(degree)
-        # std_vec = [1]* degree
-        # self.rbf = RBF(degree, mu_vec, std_vec)
 
         self.hidden_dim = hidden_dim
 
@@ -220,7 +150,6 @@ class CrossAttention(nn.Module):
         # Apply attention weights to values
         output = torch.matmul(attention_weights, V)
         
-
         output = self.fc(output+x)
 
         return output

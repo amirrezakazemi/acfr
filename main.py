@@ -7,7 +7,7 @@ import argparse
 import optuna
 import yaml
 import warnings
-import src.train as train
+from src import train
 from src.data_prep import create_synthetic_data
 
 
