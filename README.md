@@ -1,7 +1,5 @@
 # Adversarial CounterFactual Regression
-This repo contains code of adversarial counterfactual regression model (AAAI 2024 paper).
-
-This repository contains implementations of actor-critic algorithms described in the NeurIPS 2023 paper _Decision-Aware Actor-Critic with Function Approximation and Theoretical Guarantees_ (https://arxiv.org/abs/2305.15249) on two grid-world environments. To run the algorithms, please install the required packages and execute the following commands.
+This repo contains the code for implementations of adversarial counterfactual regression model described in AAAI 2024 paper _Adversarially Balanced Representation for Continuous Treatment Effect Estimation_ (https://ojs.aaai.org/index.php/AAAI/article/view/29207)  on two synthetic datasets. To run the algorithms, please install the required packages and execute the following commands.
 
 ![Comparison of three critic objective functions with varying capacity](figs/CW_MB_Linear_full_fixed.png)
 
